@@ -1,4 +1,4 @@
-for i in range(20):
-    if i == 10:  # i が 5 になったらループを終了
-        break
-    print(i)
+numbers = [1, 2, 3, 4, 5]
+
+print(numbers)
+print(type(numbers))
