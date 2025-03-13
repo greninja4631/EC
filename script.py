@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 def check_permission(has_permission):
     if not has_permission:
         print("アクセス拒否")
@@ -19,3 +20,8 @@ def check_permission(has_permission):
 check_permission(True) 
 check_permission(False)  # → アクセス拒否
   # → アクセス許可
+=======
+# リファクタリング前のコード
+def long_line_code(x: int):
+    return x * x
+>>>>>>> c3ec9d7 (コミットメッセージ)
