@@ -1,6 +1,8 @@
-const  n: number = 5;
-const m: number = 10;
+function main() {
+  const n: number = 5;
+  const m: number = 10;
+  const sum: number = n * m;
+  console.log(sum);
+}
 
-const a = n * m
-
-console.log(a);
+main();
