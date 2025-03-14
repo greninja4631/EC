@@ -1,27 +1,10 @@
-<<<<<<< HEAD
-def check_permission(has_permission):
-    if not has_permission:
-        print("アクセス拒否")
-    else:
-        print("アクセス許可")
+# 典型的な修正例（行1,23,27付近）
+def main():  # ← 関数定義が閉じられていない場合
+    print("Hello World")
 
-check_permission(False)  # → アクセス拒否
-check_permission(True)   # → アクセス許可
+# 修正後
+def main():
+    print("Hello World")  # インデントと括弧の整合性を確認
 
-
-
-def check_permission(has_permission):
-    if  has_permission:
-        print("アクセス許可")
-        
-    else:
-        print("アクセス拒否")
-
-check_permission(True) 
-check_permission(False)  # → アクセス拒否
-  # → アクセス許可
-=======
-# リファクタリング前のコード
-def long_line_code(x: int):
-    return x * x
->>>>>>> c3ec9d7 (コミットメッセージ)
+if __name__ == "__main__":
+    main()
