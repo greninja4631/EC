@@ -1,11 +1,7 @@
-#5L消費✖️10日利用したと仮定する。
-
-#1 ≦ n ≦ 10
-#1 ≦ m ≦ 20
-#n, m は整数
-
-n = 5
-m = 10
-
-a = 5*10
-print(a)
+def keisan():
+    n =2
+    m = 5
+    a = n*m
+    print(a)
+    
+keisan()
