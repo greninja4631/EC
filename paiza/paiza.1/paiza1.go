@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func keisan() {
-	n := 4
-    m := 6
+	n := 6
+	m := 8
 	a := n * m
 	fmt.Println(a)
 }
