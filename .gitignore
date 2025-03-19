@@ -1,6 +1,0 @@
-# .gitignoreに以下を追記
-echo "myenv/" >> .gitignore
-echo "__pycache__/" >> .gitignore
-echo "*.pyc" >> .gitignore
-echo "node_modules/" >> .gitignore
-echo "package-lock.json" >> .gitignore
