@@ -1,3 +1,13 @@
+s = "DETH NOTE"
+result = s.replace(" ", "_")
+print(result)
+
+
+
+
+
+
+
 
 
 
