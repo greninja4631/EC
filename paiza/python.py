@@ -4,5 +4,6 @@ def main():
     sum = n * m
     print(sum)
 
+
 if __name__ == "__main__":
     main()
