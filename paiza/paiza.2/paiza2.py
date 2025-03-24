@@ -1,11 +1,19 @@
-for i, fruit in enumerate(["apple", "banana", "orange"]):
-    print(i, "fruit")
+# p 円の食べ物と q 円の飲み物を頼んだ時に合計金額が 1000 円以上の場合に 100 円引きされます。
 
+# 食べ物の値段 p 円と飲み物の値段 q 円が改行区切りで与えられるので割引を計算した結果がいくらになるか出力してください。
+# 100 ≦ p, q ≦ 2000
 
-s = "paiza programming"
+# 900 + 120 = 1020 円となり 100 円引きし 920 円になるので
+# 920
 
-# 半角スペースを "_" に置換
-result = s.replace(" ", "_")
+p = 200
+q = 1000
 
-# 結果を出力
-print(result)  # 出力: paiza_programming
+keisan = p + q
+
+if keisan  >= 1000:
+    keisan -= 100
+    print(keisan)
+
+else:
+    print(keisan)
