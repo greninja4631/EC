@@ -13,3 +13,23 @@ def bubble_sort(arr):
 # 実行例
 arr = [3, 1, 4, 2]
 print(bubble_sort(arr))
+
+
+def mood_decorator(func):
+    def wrapper(*args, **kwargs):
+        print("🌟 Mood を取得します...")
+        return func(*args, **kwargs)
+    return wrapper
+
+class Person:
+    def __init__(self, name, mood):
+        self.name = name
+        self.__mood = mood
+
+    @property
+    @mood_decorator  # カスタムデコレーター適用
+    def mood(self):
+        return self.__mood
+
+person = Person("Bob", "neutral")
+print(person.mood) 
