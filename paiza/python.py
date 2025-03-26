@@ -33,3 +33,11 @@ class Person:
 
 person = Person("Bob", "neutral")
 print(person.mood) 
+
+
+
+x = (1)
+print(type(x))  # <class 'int'>
+
+y = (1,)
+print(type(y))  # <class 'tuple'>

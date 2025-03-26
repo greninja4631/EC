@@ -1,7 +1,3 @@
-
-p = 1000
-q = 1500
-sum = p + q
-
-sum -=100 + sum
+N = 10
+sum = N*100
 print(sum)
