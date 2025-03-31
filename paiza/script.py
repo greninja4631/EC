@@ -1,1 +1,4 @@
-リスト numbers = [3, 7, 2, 8, 5] から 最大値 を求めて出力するコードを書いてください。（max() を使わずに）
+for i in range(1, 6):
+    for j in range(i):
+        print("*" , '')
+    print()
