@@ -1,8 +1,26 @@
-numbers = [3, 7, 2, 8, 5]
+import numpy as np
 
-max_value = numbers[0]
+l = [1, 2, 3, 4, 5]
 
-for number in numbers[1:]:
-    if number > max_value:
-        max_value = number
-print(max_value)
+# x = sorted(l, reverse=True)
+# print(x)
+
+x = np.sort(l)[::-1]
+
+for item in x:
+  print(item)
+
+
+
+
+
+# import numpy as np
+
+# a = [2,5,4,12,8,3,6,0]
+
+# x = np.sort(a)[::-1]
+
+
+
+# mylist = ["C", "A", "B"]
+# newlist = sorted(mylist, reverse=True)
