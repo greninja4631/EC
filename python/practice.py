@@ -1,133 +1,64 @@
-class Node:
-    def __init__(self, pid, vruntime):
-        self.pid = pid
-        self.vruntime = vruntime
-        self.color = 'RED'  # RED or BLACK
-        self.parent = None
-        self.left = None
-        self.right = None
+import os
+import asyncio
+import wave
+import resource
+import multiprocessing
+import sounddevice as sd
+import numpy as np
 
-    def __repr__(self):
-        return f"[{self.pid}, vr={self.vruntime}, {self.color}]"
+# === グローバル設定 ===
+SAMPLERATE = 16000
+DURATION = 3  # 録音時間（秒）
+FILENAME = "sample.wav"
 
-class RedBlackTree:
-    def __init__(self):
-        self.NIL = Node(None, None)
-        self.NIL.color = 'BLACK'
-        self.root = self.NIL
+# === ファイルI/O：録音してWAV保存 ===
+def record_audio(filename):
+    print(f"[録音] {DURATION}秒間録音します...")
+    audio = sd.rec(int(SAMPLERATE * DURATION), samplerate=SAMPLERATE, channels=1, dtype='int16')
+    sd.wait()
+    with wave.open(filename, 'w') as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)  # int16 = 2バイト
+        wf.setframerate(SAMPLERATE)
+        wf.writeframes(audio.tobytes())
+    print(f"[保存完了] {filename}")
 
-    def left_rotate(self, x):
-        y = x.right
-        x.right = y.left
-        if y.left != self.NIL:
-            y.left.parent = x
-        y.parent = x.parent
-        if x.parent is None:
-            self.root = y
-        elif x == x.parent.left:
-            x.parent.left = y
-        else:
-            x.parent.right = y
-        y.left = x
-        x.parent = y
+# === 仮想メモリ使用量の確認 ===
+def print_memory_usage(tag=""):
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    print(f"[{tag}] 仮想メモリ使用量: {usage.ru_maxrss / 1024:.2f} MB")
 
-    def right_rotate(self, x):
-        y = x.left
-        x.left = y.right
-        if y.right != self.NIL:
-            y.right.parent = x
-        y.parent = x.parent
-        if x.parent is None:
-            self.root = y
-        elif x == x.parent.right:
-            x.parent.right = y
-        else:
-            x.parent.left = y
-        y.right = x
-        x.parent = y
+# === プロセス処理（fork + wait + pid表示）===
+def audio_process_worker():
+    print(f"[子プロセス] PID: {os.getpid()} にて録音処理開始")
+    print_memory_usage("子プロセス録音前")
+    record_audio(FILENAME)
+    print_memory_usage("子プロセス録音後")
 
-    def insert(self, pid, vruntime):
-        new_node = Node(pid, vruntime)
-        new_node.left = self.NIL
-        new_node.right = self.NIL
+# === 非同期で録音ファイルを再生 ===
+async def async_play_audio(filename):
+    print(f"[非同期] {filename} を再生します...")
+    with wave.open(filename, 'rb') as wf:
+        frames = wf.readframes(wf.getnframes())
+        data = np.frombuffer(frames, dtype='int16')
+        sd.play(data, wf.getframerate())
+        await asyncio.sleep(DURATION)
+        sd.stop()
+    print(f"[再生完了]")
 
-        parent = None
-        current = self.root
+# === メイン関数 ===
+def main():
+    print(f"[メイン] PID: {os.getpid()}")
 
-        while current != self.NIL:
-            parent = current
-            if new_node.vruntime < current.vruntime:
-                current = current.left
-            else:
-                current = current.right
+    # プロセスを作って録音
+    p = multiprocessing.Process(target=audio_process_worker)
+    p.start()
+    p.join()  # wait()
 
-        new_node.parent = parent
-        if parent is None:
-            self.root = new_node
-        elif new_node.vruntime < parent.vruntime:
-            parent.left = new_node
-        else:
-            parent.right = new_node
+    # 非同期で再生
+    asyncio.run(async_play_audio(FILENAME))
 
-        new_node.color = 'RED'
-        self.fix_insert(new_node)
+    print("[メイン] 処理完了")
 
-    def fix_insert(self, k):
-        while k != self.root and k.parent.color == 'RED':
-            if k.parent == k.parent.parent.left:
-                uncle = k.parent.parent.right
-                if uncle.color == 'RED':
-                    k.parent.color = 'BLACK'
-                    uncle.color = 'BLACK'
-                    k.parent.parent.color = 'RED'
-                    k = k.parent.parent
-                else:
-                    if k == k.parent.right:
-                        k = k.parent
-                        self.left_rotate(k)
-                    k.parent.color = 'BLACK'
-                    k.parent.parent.color = 'RED'
-                    self.right_rotate(k.parent.parent)
-            else:
-                uncle = k.parent.parent.left
-                if uncle.color == 'RED':
-                    k.parent.color = 'BLACK'
-                    uncle.color = 'BLACK'
-                    k.parent.parent.color = 'RED'
-                    k = k.parent.parent
-                else:
-                    if k == k.parent.left:
-                        k = k.parent
-                        self.right_rotate(k)
-                    k.parent.color = 'BLACK'
-                    k.parent.parent.color = 'RED'
-                    self.left_rotate(k.parent.parent)
-        self.root.color = 'BLACK'
-
-    def inorder(self, node=None):
-        if node is None:
-            node = self.root
-        if node != self.NIL:
-            self.inorder(node.left)
-            print(node)
-            self.inorder(node.right)
-
-    def get_min(self):
-        current = self.root
-        while current.left != self.NIL:
-            current = current.left
-        return current
-
-# --- 実行例 ---
 if __name__ == "__main__":
-    rbt = RedBlackTree()
-    rbt.insert(101, 30)
-    rbt.insert(102, 10)
-    rbt.insert(103, 50)
-    rbt.insert(104, 20)
-    rbt.insert(105, 60)
-
-    print("\n📋 CFSタスク一覧（vruntime順）:")
-    rbt.inorder()
-
-    print("\n🚀 次にスケジュールすべきタスク:", rbt.get_min())
+    main()
