@@ -5,6 +5,9 @@
 int compare(const void *a, const void *b) {
     return (*(int*)a - *(int*)b);
 }
+//*はポインターを参照渡ししている、　(*a)voidをintに変換している
+//void qsort(void *base, size_t nitems, size_t size, int (*compar)(const void *, const void*));
+//*(int*)a - *(int*)b);は、int (*compar)(const void *, const void*));
 
 int main() {
     // 元データ（必要に応じて動的に拡張も可能）
@@ -30,19 +33,24 @@ int main() {
 
     // データを昇順にソート（中央値と最頻値用）
     qsort(scores, n, sizeof(int), compare);
-    // qsortの裏側のロジック ＝ void qsort(void *base, size_t num, size_t size, int (*compar)(const void *, const void *));
+// scoresは「並び替え対象の配列」
+
+// nは「要素の個数（今回は8個）」
+
+// sizeof(int)は「１つの要素のサイズ（整数なので4バイト）」
+
+// compareは「要素同士を比べるための関数」
+
+
+
+// qsortの裏側のロジック ＝ void qsort(void *base, size_t num, size_t size, int (*compar)(const void *, const void *));
 // 配列を渡す
 // base: 配列の先頭アドレス
 // num: 要素数
 // size: 1要素あたりのサイズ（バイト数）
 // compar: 比較関数（ルールを決める関数）
-
+// base , compare 配列のアドレスをポインターで渡せる性質がある
 // // ↓ qsort がこれらを受け取ると…
-
-// 1. 配列内の要素を2つ取り出す
-// 2. comparに2つの要素を渡して順序を決める
-// 3. comparが返した結果をもとに並び替える
-// 4. 上記を繰り返してソートが完成
 
 
     // 中央値の計算
@@ -51,7 +59,7 @@ int main() {
         // 要素数が偶数 → 中央2つの平均
         median = (scores[n / 2 - 1] + scores[n / 2]) / 2.0;
     } else {
-        // 要素数が奇数 → 中央の1つだけ
+        // int scores[] が中身の要素が奇数であった場合
         median = scores[n / 2];
     }
 
@@ -61,20 +69,21 @@ int main() {
     int current_value = scores[0];
     int current_count = 1;
 
-    for (int i = 1; i < n; i++) {
-        if (scores[i] == current_value) {
-            current_count++;
-        } else {
-            current_value = scores[i];
-            current_count = 1;
-        }
-
-        if (current_count > max_count ||
-           (current_count == max_count && current_value < mode)) {
-            max_count = current_count;
-            mode = current_value;
-        }
+   for (int i = 1; i < n; i++) {
+    if (scores[i] == current_value) {
+        current_count++;  // ここが本来必要な処理！
+    } else {
+        current_value = scores[i];
+        current_count = 1;
     }
+
+    if (current_count > max_count ||
+        (current_count == max_count && current_value < mode)) {
+        max_count = current_count;
+        mode = current_value;
+    }
+}
+
 
     // 結果を表示（統一感を意識して整形）
     printf("📊 統計情報\n");
