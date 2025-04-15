@@ -3,7 +3,7 @@
 
 
 
-int compare(){
-    
+int compare(void q){
+
 }
 
