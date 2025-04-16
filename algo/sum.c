@@ -33,6 +33,7 @@ int main() {
 
     // データを昇順にソート（中央値と最頻値用）
     qsort(scores, n, sizeof(int), compare);
+//qsort()は「並び替える対象の全部の情報」が必要なので、scores[0]ではなく、scores　という表記が必要。
 // scoresは「並び替え対象の配列」
 
 // nは「要素の個数（今回は8個）」
@@ -65,8 +66,8 @@ int main() {
 
     // 最頻値（mode）の計算
     int mode = scores[0];
-    int max_count = 1;
     int current_value = scores[0];
+    int max_count = 1;
     int current_count = 1;
 
    for (int i = 1; i < n; i++) {
