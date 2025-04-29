@@ -1,5 +1,3 @@
-//✅ Cで単方向リストを構造体＋ポインタで自作するテンプレコード　
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,40 +6,50 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
+// 🔧 追加：先頭に新しいノードを追加する関数
 Node* push_front(Node *head, int val) {
-    Node *new = malloc(sizeof(Node));
-    if (!new) return head;
-    new->data = val;
-    new->next = head;
-    return new;
+    Node *new_node = malloc(sizeof(Node));
+    if (!new_node) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    new_node->data = val;
+    new_node->next = head;
+    return new_node;
 }
 
+// リストを表示する関数
+void print_list(Node *head) {
+    for (; head; head = head->next)
+        printf("%d -> ",  head->data);
+    puts("NULL");
+}
+
+// 指定した値を持つノードを削除する関数
 Node* delete_node(Node *head, int key) {
     if (!head) return NULL;
+
     if (head->data == key) {
         Node *tmp = head->next;
         free(head);
         return tmp;
     }
-    Node *cur = head;
-    while (cur->next && cur->next->data != key)
-        cur = cur->next;
-    if (cur->next) {
-        Node *tmp = cur->next;
-        cur->next = tmp->next;
-        free(tmp);
+
+for (Node *cur = head; cur != NULL && cur->next != NULL; cur = cur->next) {
+    if (cur->next->data == key) {
+        Node *tmp = cur->next;       // 削除対象をnextで指定し、＊tmpに仮想メモリのアドレスをコピーする
+        cur->next = tmp->next;       //cur10 -> next10の次のアドレスをポインタで２０で指す。　＝ *tmp＝*tmp = cur->nextなので、仮想アドレスをポインターでdata20を指している。　->next 20の仮想アドレスの次である30の仮想アドレスをポインターで指している。
+        free(tmp);                   // メモリ解放
+        break;                       // 1つだけ削除して終わり
     }
+}
+
     return head;
 }
 
-void print_list(Node *head) {
-    for (; head; head = head->next)
-        printf("%d -> ", head->data);
-    puts("NULL");
-}
-
+// リストのメモリをすべて解放する関数
 void free_all(Node *head) {
-    while (head) {
+    while (head) {  
         Node *tmp = head;
         head = head->next;
         free(tmp);
@@ -53,16 +61,16 @@ int main() {
     head = push_front(head, 30);
     head = push_front(head, 20);
     head = push_front(head, 10);
-    print_list(head);
+    print_list(head);  // 出力：10 -> 20 -> 30 -> NULL
 
     head = delete_node(head, 20);
-    print_list(head);
+    print_list(head);  // 出力：10 -> 30 -> NULL
 
     free_all(head);
     return 0;
 }
 
-
+// a（[10]）→ b（[20]）→ c（[30]）→ NULL ➡ この「→」こそが next の働き！
 
 
 
@@ -130,7 +138,7 @@ int main() {
 // Webサーバーのキュー管理	リクエストを構造体で繋いで非同期処理
 // 面接試験	「構造体 + ポインタ + リスト」問題はC言語筆記で頻出
 
-
+//✅ Cで単方向リストを構造体＋ポインタで自作するテンプレコード　
 
 // ⸻
 

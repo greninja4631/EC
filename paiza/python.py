@@ -7,13 +7,11 @@ def bubble_sort(arr):
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
                 swapped = True
         if not swapped:
-            break  # 途中で入れ替えがなければソート済み
+            break
     return arr
 
-# 実行例
 arr = [3, 1, 4, 2]
 print(bubble_sort(arr))
-
 
 def mood_decorator(func):
     def wrapper(*args, **kwargs):
@@ -27,17 +25,15 @@ class Person:
         self.__mood = mood
 
     @property
-    @mood_decorator  # カスタムデコレーター適用
+    @mood_decorator
     def mood(self):
         return self.__mood
 
 person = Person("Bob", "neutral")
-print(person.mood) 
-
-
+print(person.mood)
 
 x = (1)
-print(type(x))  # <class 'int'>
+print(type(x))
 
 y = (1,)
-print(type(y))  # <class 'tuple'>
+print(type(y))
