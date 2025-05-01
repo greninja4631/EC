@@ -7,6 +7,34 @@ typedef struct Node {
     struct Node *prev;
 } Node;
 
+Node* content(int val) {
+    Node *node = malloc(sizeof(Node));
+    if (!node) return NULL;
+    node->data = val;
+    node->next = NULL;
+    node->prev = NULL;
+    return node;
+}
+
+Node* push(Node* head, int val) {
+    Node *node = content(val);
+    if (head) {
+        node->next = head;
+        head->prev = node;
+    }
+    return node;
+}
+
+Node* pop(Node *head) {
+    if(!head) return NULL;
+    Node *tmp = head;
+    head = head->next;
+    if(head) head->prev = NULL;
+    free(tmp);
+    return head;
+}
+
+
 
 
 
@@ -17,16 +45,19 @@ int main() {
     Node *undo_stack = NULL, *redo_stack = NULL;
 
     puts("\n配列操作サンプル");
-    array_operations();
+    array_operations();  // 配列の表示
 
     puts("\nスタック操作");
-    head = push(head, 10);
+    head = push(head, 10);             // 10 を push
     undo_stack = push(undo_stack, 10);
-    head = push(head, 20);
+
+    head = push(head, 20);             // 20 を push
     undo_stack = push(undo_stack, 20);
-    head = push(head, 30);
+
+    head = push(head, 30);             // 30 を push
     undo_stack = push(undo_stack, 30);
-    print_list(head);
+
+    print_list(head);                  // 現在のスタック表示
 
     puts("\nUndo実行");
     head = undo(&undo_stack, &redo_stack, head);
@@ -57,5 +88,6 @@ int main() {
     free_all(head);
     free_all(undo_stack);
     free_all(redo_stack);
+
     return 0;
 }
