@@ -16,8 +16,3 @@ def set_message(msg: Message):
     state["message"] = msg.new_message
     return state
 
-# 	•	状態（state） = グローバルな message
-# 	•	命令（command） = 関数呼び出し（GET/POST風）
-# 	•	WebフレームワークなしでもRESTの設計思想を再現可能
-
-# ⸻
