@@ -8,7 +8,7 @@ typedef struct {
     int PC;     // プログラムカウンタ
 } CPU;
 
-// 命令セット
+// 命令セットInstructionCode;
 typedef enum {
     LOAD_A = 1,   // Aに値をロード
     LOAD_B,       // Bに値をロード
