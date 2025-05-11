@@ -7,36 +7,51 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-// ノードを先頭に追加する関数
-Node* push(Node *head , int val) {
-Node *tmp = malloc(sizeof(Node));
-if(!tmp) return NULL;
 
-head->data = val;
-head->next = head;
-return tmp;
+Node *push(Node *head , int val) {
+Node *point = malloc(sizeof(Node));
+if(!point) return NULL;
+
+point->data = val;
+point->next = head;
+return point;
 }
+  
+Node *delete(Node *head , int key) {
 
-// リストから指定値を削除する関数（最初に見つかった1つだけ）
-Node* delete(Node *head , int key) {
 Node dummy = {0 , head};
 Node *cur = &dummy;
 
-if(*cur->next && *cur->next->data !=key) {
+while(cur->next && cur->next->data !=key) {
+ cur = cur->next;
+
+
+if(cur->next) {
+  Node *point = cur->next;
+  cur->next = *point->next;
+  free(point);
 
 }
+return dummy.next;
 
+} 
+}
 
+void list(Node *head) {
+for(Node *cur = head; head; cur =head->next) {
+  printf("%d\n ->" cur->data);
+  if(cur->next) printf(" -> ");
+}
+printf("-> NULL\n");
+}
+
+free_all(Node *head) {
 
 }
-// リストを表示する関数
-
-
-// リストをすべて解放する関数
-
 
 int main() {
     Node *head = NULL;
+
 
     // 要素追加
     head = push(head, 10);
