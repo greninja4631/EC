@@ -3,7 +3,7 @@
  * @brief API駆動型マイクロサービス基盤に適合した、学習・クラウド実装向けリンクリスト構造
  * @details 本コードはFlutter × FastAPI構成やDockerベースCI、マルチクラウド環境との統合を前提にした実務品質実装であり、
  * Doxygen対応・静的解析・抽象データ型・ログ・テスト容易性に重点を置いています。
- */
+ 
 
  #include <stdio.h>
  #include <stdlib.h>
