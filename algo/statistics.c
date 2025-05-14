@@ -2,7 +2,7 @@
  * @file statistics.c
  * @brief 統計演算用のAPIドリブン構造体モジュール（Docker・CI/CD・API連携対応）
  * @details 本モジュールはFlutterなどのクライアントとFastAPIなどのAPIサーバーとの統合を前提に、
- * データ構造と処理ロジックをADTとして分離し、可読性、拡張性、テスト容易性を重視した構成である。
+ * データ構造と処理ロジックをADTとして分離し、可読性、拡張性、テスト容易性、CI/CD、クラウドデプロイ性を重視した構成である。
  */
 
  #include <stdio.h>
@@ -16,6 +16,13 @@
  // ---------------- ログマクロ定義（CI/CD・クラウド環境での可観測性） ---------------- //
  #define LOG_INFO(...)   fprintf(stdout,  "[INFO]  " __VA_ARGS__)
  #define LOG_ERROR(...)  fprintf(stderr, "[ERROR] " __VA_ARGS__)
+ 
+ // ---------------- エラーコードの定義（SRP対応） ---------------- //
+ typedef enum {
+     STAT_SUCCESS = 0,
+     STAT_MEM_ALLOC_FAIL = 1,
+     STAT_INVALID_INPUT = 2
+ } ErrorCode;
  
  // ---------------- 抽象データ型：統計構造体 ---------------- //
  
@@ -34,7 +41,6 @@
  
  // ---------------- 内部ユーティリティ関数 ---------------- //
  
- /** @brief 昇順ソート用比較関数 */
  static int compare_ints(const void *a, const void *b) {
      return (*(int *)a - *(int *)b);
  }
@@ -96,13 +102,10 @@
  
  // ---------------- 統計モジュール：公開API（ADT操作） ---------------- //
  
- /**
-  * @brief 統計演算を実行し構造体で返す
-  * @param data 整数配列
-  * @param size 配列のサイズ
-  * @return Statistics 統計結果
-  */
  Statistics calculate_statistics(const int *data, int size) {
+     assert(data != NULL);
+     assert(size > 0);
+ 
      Statistics stats;
      stats.sum     = calculate_sum(data, size);
      stats.min     = find_min(data, size);
@@ -130,6 +133,7 @@
      printf("  \"mode\": %d\n", stats.mode);
      printf("}\n");
  
+     // ユニットテスト相当（CI統合用）
      assert(stats.sum > 0);
      assert(stats.min >= 0);
      assert(stats.max >= stats.min);
@@ -201,3 +205,7 @@
 // をすべて統合した実用的な構造になっています。
 
 // 特に、Flutter × FastAPI × DockerというスタックでAPIドリブンな統計処理を実現したい人にとって、最初のステップとして極めて相性が良いサンプルです。
+
+
+
+// 
