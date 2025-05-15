@@ -1,10 +1,27 @@
-FROM gcc:latest
-RUN apt update && apt install -y valgrind
+# ✅ ベース：Jenkins + JDK（CI/CD実行環境として安定）
+FROM jenkins/jenkins:lts-jdk11
+
+# ✅ root権限で追加インストール
+USER root
+
+# ⛏️ 必要なツール群をインストール（C開発＋Docker CLI）
+RUN apt-get update && apt-get install -y \
+    gcc \
+    make \
+    valgrind \
+    docker.io \
+    bash \
+    && apt-get clean
+
+# ✅ Jenkinsユーザーに戻す（セキュリティ考慮）
+USER jenkins
+
+# ✅ 作業ディレクトリ（後からJenkinsでマウントされる想定）
 WORKDIR /app
-COPY . /app
-CMD ["bash"]
 
+# デフォルトコマンドは Jenkinsが制御するため不要
 
+# デフォルトコマンドは Jenkinsが制御するため不要
 # 🧱 1行目：ベース環境を決める
 # •	FROM：この環境は「どのOS・開発環境」からスタートするかを決める命令
 # •	gcc：C言語用コンパイラ（GNU Compiler Collection）が入った公式Docker環境
