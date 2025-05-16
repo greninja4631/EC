@@ -1,33 +1,59 @@
-# Makefile: オンプレCI/CDの基礎用
+# Makefile: オンプレCI/CD 練習用（C + Python）
 
-# コンパイル対象とオプション
-TARGET = stats
-SRC = statistics.c
-CFLAGS = -Wall -Wextra -g
+# --------- 共通設定 ---------
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -g
 
-# デフォルトターゲット
+# --------- Cアプリケーション ---------
+C_SRC = main.c
+C_BIN = main
+
+# --------- Pythonスクリプト ---------
+PYTHON_SRC = main.py
+
+# --------- Cテスト ---------
+C_TEST_SRC = test/test_main.c
+C_TEST_BIN = test/test_main
+
+# --------- Pythonテスト ---------
+PYTEST_SRC = test/test_main.py
+
+# デフォルト（ビルドと実行）
 all: build run
 
-# ビルド
+# --------- 実行 ---------
 build:
-	@echo "[INFO] ビルド中..."
-	gcc $(CFLAGS) -o $(TARGET) $(SRC)
+	@echo "[INFO] Cコードをビルド中..."
+	$(CC) $(CFLAGS) -o $(C_BIN) $(C_SRC)
 
-# 実行＋ログ保存
 run:
-	@echo "[INFO] 実行中..."
-	./$(TARGET) 2>&1 | tee log.txt
+	@echo "[INFO] Cプログラムを実行..."
+	./$(C_BIN) 2>&1 | tee log.txt
+	@echo "[INFO] Pythonスクリプトを実行..."
+	python3 $(PYTHON_SRC)
 
-# メモリ検査（valgrind）
+# --------- メモリ検査 ---------
 memcheck:
-	@echo "[INFO] valgrind によるメモリ検査..."
-	valgrind --leak-check=full ./$(TARGET) 2>&1 | tee memcheck.log
+	@echo "[INFO] valgrind によるメモリ検査中..."
+	valgrind --leak-check=full ./$(C_BIN) 2>&1 | tee memcheck.log
 
-# クリーンアップ
+# --------- テスト ---------
+test: test_c test_py
+
+test_c:
+	@echo "[TEST] Cテストをビルド＆実行中..."
+	$(CC) $(CFLAGS) -o $(C_TEST_BIN) $(C_TEST_SRC)
+	./$(C_TEST_BIN)
+
+test_py:
+	@echo "[TEST] Pythonテストを実行中..."
+	pytest $(PYTEST_SRC)
+
+# --------- クリーンアップ ---------
 clean:
 	@echo "[INFO] クリーン中..."
-	@rm -f $(TARGET) log.txt memcheck.log
+	rm -f $(C_BIN) $(C_TEST_BIN) log.txt memcheck.log
 	@echo "[INFO] クリーン完了"
 
-# 明示的に phony ターゲット指定（エラー防止）
-.PHONY: all build run memcheck clean
+# --------- 明示的な phony ターゲット ---------
+.PHONY: all build run memcheck test test_c test_py clean
