@@ -1,27 +1,22 @@
-# Makefile: オンプレCI/CD 練習用（C + Python）
-
 # --------- 共通設定 ---------
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g
 
 # --------- Cアプリケーション ---------
-C_SRC = main.c
-C_BIN = main
-
-# --------- Pythonスクリプト ---------
-PYTHON_SRC = main.py
+C_SRC = statistics.c
+C_BIN = stats
 
 # --------- Cテスト ---------
-C_TEST_SRC = test/test_main.c
-C_TEST_BIN = test/test_main
+C_TEST_SRC = test/sample_assert.c
+C_TEST_BIN = test/sample_assert
 
 # --------- Pythonテスト ---------
-PYTEST_SRC = test/test_main.py
+PYTEST_SRC = test/sample_assert.py
 
-# デフォルト（ビルドと実行）
+# --------- デフォルト（Cビルド＋実行） ---------
 all: build run
 
-# --------- 実行 ---------
+# --------- ビルド＆実行 ---------
 build:
 	@echo "[INFO] Cコードをビルド中..."
 	$(CC) $(CFLAGS) -o $(C_BIN) $(C_SRC)
@@ -29,15 +24,13 @@ build:
 run:
 	@echo "[INFO] Cプログラムを実行..."
 	./$(C_BIN) 2>&1 | tee log.txt
-	@echo "[INFO] Pythonスクリプトを実行..."
-	python3 $(PYTHON_SRC)
 
-# --------- メモリ検査 ---------
+# --------- メモリ検査（Valgrind） ---------
 memcheck:
 	@echo "[INFO] valgrind によるメモリ検査中..."
 	valgrind --leak-check=full ./$(C_BIN) 2>&1 | tee memcheck.log
 
-# --------- テスト ---------
+# --------- テスト（C + Python） ---------
 test: test_c test_py
 
 test_c:
@@ -55,5 +48,5 @@ clean:
 	rm -f $(C_BIN) $(C_TEST_BIN) log.txt memcheck.log
 	@echo "[INFO] クリーン完了"
 
-# --------- 明示的な phony ターゲット ---------
-.PHONY: all build run memcheck test test_c test_py clean
+# --------- 明示的に phony 指定 ---------
+.PHONY: all build run memcheck test test_c test_py cleanつ
