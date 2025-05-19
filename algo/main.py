@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # /**
 #  * @file main.py
 #  * @brief 統計演算APIサーバー（FastAPI + DI + Observability Ready）
@@ -180,3 +181,7 @@ def test_statistics_module():
 	# •	APIとロジックの責務を分離
 	# 5.	テストしやすさ
 	# •	モジュール単体テストが可能な構造を維持 (test_statistics_module())
+=======
+# main.py
+print("[INFO] Python main script executed.")
+>>>>>>> pre
