@@ -1,0 +1,53 @@
+services:
+  api:
+    build:
+      context: ./api  # 修正: `context: ..` から `context: ./api` へ
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api:/app
+    working_dir: /app
+    command: ["./main"]
+    depends_on:
+      - db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: ["python", "main.py"]
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+
+  db:
+    image: postgres:15
+    container_name: EC
+    restart: always
+    environment:
+      POSTGRES_USER: greninja
+      POSTGRES_PASSWORD: matsuda40
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

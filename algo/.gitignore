@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+__pycache__/
+*.pyc
+=======
 # コンパイル生成物
 *.o
 main
@@ -12,3 +16,4 @@ __pycache__/
 
 # テスト用バイナリ
 test/test_main
+>>>>>>> pre
