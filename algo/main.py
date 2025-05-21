@@ -1,39 +1,44 @@
-<<<<<<< HEAD
-# /**
-#  * @file main.py
-#  * @brief 統計演算APIサーバー（FastAPI + DI + Observability Ready）
-#  * @details FlutterやFirebaseクライアントからPOSTされた整数配列に対し、
-#  * 抽象化された統計演算処理を実行し、JSONで統計情報を返す。Docker・CI/CD・クラウド実装向け。
-#  */
+# main.py
+# ----------------------------------------------
+# モダンAPIサーバー (FastAPI + DI + Prometheus + Clean Arch)
+# Firebase/Flutter + CI/CD/クラウド部署 + Web3/情勢分析接続前提
+# ----------------------------------------------
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import List, Annotated
+from typing import List, Literal, Union
 import logging
+import statistics
+import enum
 
-# Prometheus メトリクス収集
+# ------------------------
+# 観測性の追加 (Prometheus)
+# ------------------------
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
     ENABLE_METRICS = True
 except ImportError:
     ENABLE_METRICS = False
 
-# ---------------------------
-# ログ設定（構造化ロギング）
-# ---------------------------
+# ------------------------
+# ログ設定
+# ------------------------
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger("statistics")
 
-# ---------------------------
-# FastAPI アプリケーション定義
-# ---------------------------
+# ------------------------
+# FastAPI アプリケーション
+# ------------------------
 app = FastAPI(
     title="Statistics API",
-    description="Flutter/Firebase対応・統計演算API",
-    version="1.1.0"
+    description="CI/CD + Firebase 連携用統計ロジックAPI",
+    version="2.0.0"
 )
 
+# ------------------------
+# グローバルコール + Web3 + FlutterWeb3
+# ------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,19 +50,22 @@ app.add_middleware(
 if ENABLE_METRICS:
     Instrumentator().instrument(app).expose(app)
 
-# ---------------------------
-# リクエスト・レスポンスモデル
-# ---------------------------
+# ------------------------
+# Enum 型 統計タイプ
+# ------------------------
+class StatisticType(str, enum.Enum):
+    sum = "sum"
+    min = "min"
+    max = "max"
+    average = "average"
+    median = "median"
+    mode = "mode"
+
+# ------------------------
+# Request/Response 型 (Pydantic + OpenAPI拡張)
+# ------------------------
 class StatisticsRequest(BaseModel):
-    values: Annotated[
-        List[int],
-        Field(
-            min_length=1,
-            max_length=1000,
-            example=[1, 2, 3, 3, 4, 5],
-            description="統計処理を行う整数のリスト"
-        )
-    ]
+    values: List[int] = Field(..., description="統計計算する数列", example=[1, 2, 3, 3, 4, 5])
 
 class StatisticsResponse(BaseModel):
     sum: int
@@ -67,121 +75,107 @@ class StatisticsResponse(BaseModel):
     median: float
     mode: int
 
-# ---------------------------
-# 統計演算ロジック（ADT）
-# ---------------------------
+# ------------------------
+# 統計ロジック (DI + Clean Arch)
+# ------------------------
 class StatisticsCalculator:
-    def calculate_sum(self, data: List[int]) -> int:
-        return sum(data)
-
-    def calculate_min(self, data: List[int]) -> int:
-        return min(data)
-
-    def calculate_max(self, data: List[int]) -> int:
-        return max(data)
-
-    def calculate_average(self, data: List[int]) -> float:
-        return round(sum(data) / len(data), 2)
-
-    def calculate_median(self, data: List[int]) -> float:
+    def calculate(self, data: List[int]) -> StatisticsResponse:
+        if not data:
+            raise ValueError("input data is empty")
         sorted_data = sorted(data)
-        n = len(sorted_data)
-        mid = n // 2
-        return round((sorted_data[mid] + sorted_data[mid - 1]) / 2, 2) if n % 2 == 0 else float(sorted_data[mid])
+        freq = {x: data.count(x) for x in data}
+        most = max(freq.items(), key=lambda x: x[1])[0]
 
-    def calculate_mode(self, data: List[int]) -> int:
-        freq = {}
-        for val in data:
-            freq[val] = freq.get(val, 0) + 1
-        return max(freq, key=freq.get)
+        return StatisticsResponse(
+            sum=sum(data),
+            min=min(data),
+            max=max(data),
+            average=round(sum(data) / len(data), 2),
+            median=statistics.median(data),
+            mode=most
+        )
 
-# ---------------------------
-# DI対応ファクトリ関数
-# ---------------------------
+# ------------------------
+# DI コンテナでの渡し組み
+# ------------------------
 def get_calculator():
     return StatisticsCalculator()
 
-# ---------------------------
-# 統計演算エンドポイント
-# ---------------------------
+# ------------------------
+# エンドポイント (async対応 / DI導入 / 型明示)
+# ------------------------
 @app.post("/statistics", response_model=StatisticsResponse)
 async def compute_statistics(
     payload: StatisticsRequest,
     calculator: StatisticsCalculator = Depends(get_calculator)
 ):
     try:
-        data = payload.values
-        return StatisticsResponse(
-            sum=calculator.calculate_sum(data),
-            min=calculator.calculate_min(data),
-            max=calculator.calculate_max(data),
-            average=calculator.calculate_average(data),
-            median=calculator.calculate_median(data),
-            mode=calculator.calculate_mode(data)
-        )
+        return calculator.calculate(payload.values)
     except Exception as e:
-        logger.error(f"統計計算失敗: {e}")
-        raise HTTPException(status_code=500, detail="統計処理中にエラーが発生しました")
+        logger.error(f"[ERROR] /statistics failed: {e}")
+        raise HTTPException(status_code=400, detail="統計処理中にエラーが発生しました")
 
-# ---------------------------
-# ヘルスチェック
-# ---------------------------
+# ------------------------
+# Web3ウォレットチェック用API
+# ------------------------
+@app.get("/wallet-check")
+async def wallet_check():
+    return {"status": "ok", "message": "Web3ウォレット確認用API"}
+
+# ------------------------
+# ヘルスチェック用 (Cloud Run / Firebase Hosting用)
+# ------------------------
 @app.get("/")
-async def health_check():
-    return {"status": "ok", "message": "統計APIは稼働中"}
+async def health():
+    return {"status": "ok", "version": "2.0.0"}
 
-# ---------------------------
-# 単体テスト関数（pytest対応）
-# ---------------------------
-def test_statistics_module():
+# ------------------------
+# 単体テスト (CI用)
+# ------------------------
+def test_module():
     calc = StatisticsCalculator()
-    sample = [1, 2, 2, 3, 4]
-    assert calc.calculate_sum(sample) == 12
-    assert calc.calculate_min(sample) == 1
-    assert calc.calculate_max(sample) == 4
-    assert calc.calculate_average(sample) == 2.4
-    assert calc.calculate_median(sample) == 2.0
-    assert calc.calculate_mode(sample) == 2
+    s = calc.calculate([1, 2, 2, 3, 4])
+    assert s.sum == 12
+    assert s.min == 1
+    assert s.max == 4
+    assert s.average == 2.4
+    assert s.median == 2.0
+    assert s.mode == 2
 
 
-    # 📌 実装に含めた内容
-	# 1.	抽象データ型（ADT）化：
-	# •	StatisticsCalculator クラスとしてロジックをモジュール化
-	# •	関数群は全て静的メソッドで独立性・テスト性を保持
-	# 2.	エラーハンドリングとログ機構：
-	# •	try-except と logging による標準化されたエラー処理
-	# •	LOG_ERROR 相当を logger.error() で明示
-	# 3.	ユニットテスト導入：
-	# •	test_statistics_module() による pytest 対応関数を付属
-	# •	即時に pytest でテスト可能な構成
-	# 4.	メモリ安全性とミニマル構成：
-	# •	CではなくPythonベースのため手動のメモリ管理は不要
-	# •	可変長処理も型制約でガード済み
-	# 5.	Doxygen的コメント構造（Python版）：
-	# •	@file, @brief, @details に準じたモジュール先頭ドキュメントを記載
-	# 6.	インターフェースと実装の分離：
-	# •	外部API部（FastAPI）と内部ロジック部（StatisticsCalculator）を分離
-	# 7.	OOP的な状態設計：
-	# •	APIはステートレスだが、設計としてOOPの形式を尊重
-	# 8.	CI/CD・静的解析対応：
-	# •	Pythonの静的解析ツール（flake8, mypy, black）に対応可能な設計
-	# 9.	Docker・Linux・クラウド適合設計：
-	# •	CORS対応、ロギング、軽量モジュール構成により Cloud Run/Firebase Hosting/Docker に対応しやすい形
+# ✅ 人間が 覚えて理解すべき 部分（重要知識・汎用力）
+
+# カテゴリ	内容	なぜ覚えるべきか
+# 1. HTTPとREST APIの基礎	GETとPOSTの違い、ステータスコードの意味（200/400/500など）	全てのAPI設計・デバッグの土台。全サービス共通。
+# 2. Pydantic / BaseModel の意味と使い方	型チェック、データバリデーション、OpenAPIの自動生成に直結	クライアントからの入力を防御し、型安全性を担保する。
+# 3. FastAPIの DI（Depends）構造	Depends(get_service) のような依存性注入の構造	OOP的な責務分離、テスト、再利用性の中核。
+# 4. 統計関数の意味（平均・中央値・最頻値）	median, mode, average の計算ロジック	統計APIの核であり、CSの基本教養でもある。
+# 5. ロギングと例外処理の意味	try-except や logger.error の使い方	実運用時にバグや障害を追跡するための最低限スキル。
+# 6. JSONとDictの違い	Pythonの辞書（dict）とJSONの関係（序列/フォーマット）	API設計・通信のフォーマット理解に必要不可欠。
+# 7. Enumの意義	Enumを使って返す型を明示し、誤った文字列返却を防ぐ	型安全・コード補完・Swaggerドキュメントの質に直結。
 
 
-    # 🧠 追加された重要ポイント
-	# 1.	依存性注入（Dependency Injection）
-	# •	Depends(get_calculator) により、StatisticsCalculator を注入式に変更
-	# 2.	OpenAPIスキーマの拡張
-	# •	Field(..., description=..., example=...) によるクライアント連携強化
-	# 3.	非同期対応（Async Ready）
-	# •	すべてのエンドポイントを async def に切り替え
-	# 4.	構造的分離（Clean Architectureベース）
-	# •	ロジックを StatisticsCalculator クラスに保持
-	# •	APIとロジックの責務を分離
-	# 5.	テストしやすさ
-	# •	モジュール単体テストが可能な構造を維持 (test_statistics_module())
-=======
-# main.py
-print("[INFO] Python main script executed.")
->>>>>>> pre
+# ⸻
+
+# 🤖 AIに 丸投げしてよい部分（毎回手で書く必要はない）
+
+# カテゴリ	内容	なぜAIに任せてOKか
+# 1. BaseModel の定義の boilerplate	class Request(BaseModel): values: List[int] など	Pydantic構文は反復が多く、AIがミスなく補完できる。
+# 2. OpenAPI用の Field(description=..., example=...)	Swagger用のコメント記述	説明文の生成はAIの得意領域。あとから編集可能。
+# 3. Prometheusの導入コード	Instrumentator().instrument(app).expose(app)	一度構成すれば毎回同じ。定型処理なので暗記不要。
+# 4. テスト関数（pytest対応）	def test_statistics(): assert calc.sum([1,2,3]) == 6	テストコードは冗長になりがちなので生成で十分。
+# 5. DockerfileやCI用の.yml構成	FROM python:3.11 ... や GitHub Actionsワークフロー	インフラ構成は複雑でもパターン化されておりAIが得意。
+# 6. クライアントFlutter側のDio + Freezedコード	@freezed class Statistics with _$Statistics など	型付けAPI呼び出しコードは生成が最速・確実。
+# 7. Swagger UI向けの補助説明文の自動生成	自然言語説明や例文	要件から説明を自動で出すのはAIが一番効率的。
+
+
+# ⸻
+
+# 🧠 総まとめ：覚える vs 任せるフロー
+
+# 判断基準	具体的な考え方
+# ✅ CSの概念に関わるもの → 覚える	例: HTTP, 統計処理, DI, バリデーションの設計思想
+# ✅ トラブル時に読む必要があるログや例外処理 → 覚える	例: logger.error(), try-except の意図
+# 🤖 定型化された構成コード → AIに任せる	例: docker-compose.yml, BaseModelの定義など
+# 🤖 Swagger用の例文や説明文 → AIに書かせる	例: description="平均値を返す" など文章系
+

@@ -1,39 +1,20 @@
 import pyautogui
 import time
-<<<<<<< HEAD
-
-# 総ループ回数（4分 × 135回 = 540分 = 9時間）
-loop_count = 135
-
-print("🟢 マウス操作スタート（9時間持続）")
-
-for i in range(loop_count):
-    pyautogui.moveRel(0, 1)   # 1px動かす
-    pyautogui.moveRel(0, -1)  # 戻す
-    print(f"✅ {i+1}回目: Mouse moved at {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    time.sleep(240)  # 4分待機
-
-print("🔚 9時間のマウス操作が完了しました")
-=======
 from datetime import datetime, timedelta
 
-# 開始時刻
+# ✅ 終了時間：9時間後
 start_time = datetime.now()
 end_time = start_time + timedelta(hours=9)
 
 print(f"開始: {start_time.strftime('%H:%M:%S')} ～ 終了予定: {end_time.strftime('%H:%M:%S')}")
 print("Slackオンライン維持を開始します...")
 
-# 無限ループ
+# ✅ マウスを定期的に動かしてSlackオンライン維持
 while datetime.now() < end_time:
-    # 軽くマウスを動かす（オンライン状態維持のため）
     x, y = pyautogui.position()
-    pyautogui.moveTo(x + 1, y + 1, duration=0.1)
-    pyautogui.moveTo(x, y, duration=0.1)
+    pyautogui.moveTo(x + 1, y + 1, duration=0.1)  # 少し動かす
+    pyautogui.moveTo(x, y, duration=0.1)          # 元に戻す
     print(f"[{datetime.now().strftime('%H:%M:%S')}] アクション実行")
+    time.sleep(240)  # 4分待機
 
-    # 4分（240秒）待機
-    time.sleep(240)
-
-print("9時間の維持が完了しました。Slackオンライン維持を終了します。")
->>>>>>> pre
+print("🔚 9時間のマウス操作が完了しました")
